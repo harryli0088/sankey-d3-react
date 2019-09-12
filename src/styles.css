@@ -1,0 +1,22 @@
+/* add css styles here (optional) */
+
+.nodeRect {
+  cursor: move;
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+}
+
+.nodeText {
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff;
+}
+
+.path {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .2;
+}
+
+.path:hover {
+  stroke-opacity: .5;
+}
