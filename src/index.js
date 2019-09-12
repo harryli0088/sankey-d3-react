@@ -96,8 +96,6 @@ export default class Sankey extends Component {
       textDy=".35em"
     } = this.props
 
-    console.log(data);
-
 
     return (
       <svg width={width} height={height} onMouseMove={this.onMouseMove} onMouseUp={this.endDrag} onMouseLeave={this.endDrag}>
