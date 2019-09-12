@@ -3,6 +3,7 @@
 > sankey-d3-react
 
 ![Demo](/example/sankey-d3-react.gif)
+
 GIF created using https://ezgif.com/video-to-gif
 
 Based off of this example: https://bl.ocks.org/GerardoFurtado/ff2096ed1aa29bb74fa151a39e9c1387
