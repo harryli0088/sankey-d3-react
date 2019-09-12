@@ -5796,15 +5796,17 @@ var possibleConstructorReturn = function (self, call) {
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
-var ExampleComponent = function (_Component) {
-  inherits(ExampleComponent, _Component);
+//based off of this example: https://bl.ocks.org/GerardoFurtado/ff2096ed1aa29bb74fa151a39e9c1387
 
-  function ExampleComponent() {
-    classCallCheck(this, ExampleComponent);
-    return possibleConstructorReturn(this, (ExampleComponent.__proto__ || Object.getPrototypeOf(ExampleComponent)).apply(this, arguments));
+var Sankey = function (_Component) {
+  inherits(Sankey, _Component);
+
+  function Sankey() {
+    classCallCheck(this, Sankey);
+    return possibleConstructorReturn(this, (Sankey.__proto__ || Object.getPrototypeOf(Sankey)).apply(this, arguments));
   }
 
-  createClass(ExampleComponent, [{
+  createClass(Sankey, [{
     key: 'render',
     value: function render() {
       var _props = this.props,
@@ -5874,14 +5876,14 @@ var ExampleComponent = function (_Component) {
       );
     }
   }]);
-  return ExampleComponent;
+  return Sankey;
 }(Component);
 
-ExampleComponent.propTypes = {
+Sankey.propTypes = {
   data: PropTypes.object.isRequired,
   width: PropTypes.number.isRequired,
   height: PropTypes.number
 };
 
-export default ExampleComponent;
+export default Sankey;
 //# sourceMappingURL=index.es.js.map

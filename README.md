@@ -2,7 +2,7 @@
 
 > sankey-d3-react
 
-[![NPM](https://img.shields.io/npm/v/sankey-d3-react.svg)](https://www.npmjs.com/package/sankey-d3-react) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+Based off of this example: https://bl.ocks.org/GerardoFurtado/ff2096ed1aa29bb74fa151a39e9c1387
 
 ## Development
 
@@ -28,15 +28,42 @@ npm install --save sankey-d3-react
 ```jsx
 import React, { Component } from 'react'
 
-import MyComponent from 'sankey-d3-react'
+import Sankey from 'sankey-d3-react'
 
-class Example extends Component {
+const data = {
+  "nodes":[
+    {"node":0,"name":"node0",color:"blue"},
+    {"node":1,"name":"node1",color:"green"},
+    {"node":2,"name":"node2",color:"red"},
+    {"node":3,"name":"node3",color:"orange"},
+    {"node":4,"name":"node4",color:"yellow"}
+  ],
+  "links":[
+    {"source":0,"target":2,"value":2},
+    {"source":1,"target":2,"value":2},
+    {"source":1,"target":3,"value":2},
+    {"source":0,"target":4,"value":2},
+    {"source":2,"target":3,"value":2},
+    {"source":2,"target":4,"value":2},
+    {"source":3,"target":4,"value":4}
+  ]
+}
+
+
+export default class App extends Component {
   render () {
     return (
-      <MyComponent />
+      <div>
+        <Sankey
+          data={data}
+          width={700}
+          height={300}
+        />
+      </div>
     )
   }
 }
+
 ```
 
 ## License

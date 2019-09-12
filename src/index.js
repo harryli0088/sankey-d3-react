@@ -6,7 +6,8 @@ import styles from './styles.css'
 import * as d3 from "d3"
 import sankeyFunction from "./sankey.js"
 
-export default class ExampleComponent extends Component {
+//based off of this example: https://bl.ocks.org/GerardoFurtado/ff2096ed1aa29bb74fa151a39e9c1387
+export default class Sankey extends Component {
   static propTypes = {
     data: PropTypes.object.isRequired,
     width: PropTypes.number.isRequired,

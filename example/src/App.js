@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-import ExampleComponent from 'sankey-d3-react'
+import Sankey from 'sankey-d3-react'
 
 const data = {
   "nodes":[
@@ -26,7 +26,7 @@ export default class App extends Component {
   render () {
     return (
       <div>
-        <ExampleComponent
+        <Sankey
           data={data}
           width={700}
           height={300}
