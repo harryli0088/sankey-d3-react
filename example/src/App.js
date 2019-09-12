@@ -19,7 +19,10 @@ const data = {
     {"source":2,"target":4,"value":2},
     {"source":3,"target":4,"value":4}
   ]
-}
+};
+
+
+const format = function(d) { return d + " units"; };
 
 
 export default class App extends Component {
@@ -30,6 +33,12 @@ export default class App extends Component {
           data={data}
           width={700}
           height={300}
+          nodeWidth={36}
+          nodePadding={40} //padding top and bottom between the nodes
+          iterations={40} //number of iterations to calculate sankey
+          format={format}
+          textPaddingX={6} //padding horizontally between node and text
+          textDy=".35em" 
         />
       </div>
     )
