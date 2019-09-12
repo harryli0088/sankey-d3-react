@@ -30,15 +30,16 @@ export default class App extends Component {
     return (
       <div>
         <Sankey
-          data={data}
-          width={700}
-          height={300}
-          nodeWidth={36}
-          nodePadding={40} //padding top and bottom between the nodes
-          iterations={40} //number of iterations to calculate sankey
-          format={format}
-          textPaddingX={6} //padding horizontally between node and text
-          textDy=".35em" 
+          data={data} //only required prop, should be object with fields nodes and links
+
+          width={700} //default 700
+          height={500} //default 500
+          nodeWidth={36} //default 36
+          nodePadding={40} //default 40, padding top and bottom between the nodes
+          iterations={40} //default 40, number of iterations to calculate sankey
+          format={format} //default (d) => {return d}
+          textPaddingX={6} //default 6, padding horizontally between node and text
+          textDy=".35em" //default ".35em"
         />
       </div>
     )
