@@ -2,6 +2,9 @@
 
 > sankey-d3-react
 
+![Demo](/example/sankey-d3-react.gif)
+GIF created using https://ezgif.com/video-to-gif
+
 Based off of this example: https://bl.ocks.org/GerardoFurtado/ff2096ed1aa29bb74fa151a39e9c1387
 
 ## Development
@@ -20,7 +23,7 @@ cd example && npm start
 ## Install
 
 ```bash
-npm install --save sankey-d3-react
+npm install --save harryli0088/sankey-d3-react
 ```
 
 ## Usage
@@ -47,7 +50,10 @@ const data = {
     {"source":2,"target":4,"value":2},
     {"source":3,"target":4,"value":4}
   ]
-}
+};
+
+
+const format = function(d) { return d + " units"; };
 
 
 export default class App extends Component {
@@ -55,9 +61,16 @@ export default class App extends Component {
     return (
       <div>
         <Sankey
-          data={data}
-          width={700}
-          height={300}
+          data={data} //only required prop, should be object with fields nodes and links
+
+          width={700} //default 700
+          height={500} //default 500
+          nodeWidth={36} //default 36
+          nodePadding={40} //default 40, padding top and bottom between the nodes
+          iterations={40} //default 40, number of iterations to calculate sankey
+          format={format} //default (d) => {return d}
+          textPaddingX={6} //default 6, padding horizontally between node and text
+          textDy=".35em" //default ".35em"
         />
       </div>
     )

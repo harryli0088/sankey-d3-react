@@ -33,7 +33,7 @@ function styleInject(css, ref) {
   }
 }
 
-var css = "/* add css styles here (optional) */\n\n.styles_nodeRect__1q5YV {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.styles_nodeText__3Wpsg {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.styles_path__nv3k2 {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.styles_path__nv3k2:hover {\n  stroke-opacity: .5;\n}\n";
+var css = "/* add css styles here (optional) */\n\n.styles_nodeRect__1q5YV {\n  cursor: ns-resize;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.styles_nodeText__3Wpsg {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.styles_path__nv3k2 {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.styles_path__nv3k2:hover {\n  stroke-opacity: .5;\n}\n";
 var styles = { "nodeRect": "styles_nodeRect__1q5YV", "nodeText": "styles_nodeText__3Wpsg", "path": "styles_path__nv3k2" };
 styleInject(css);
 
@@ -5806,39 +5806,108 @@ var possibleConstructorReturn = function (self, call) {
 var Sankey = function (_Component) {
   inherits(Sankey, _Component);
 
-  function Sankey() {
+  function Sankey(props) {
     classCallCheck(this, Sankey);
-    return possibleConstructorReturn(this, (Sankey.__proto__ || Object.getPrototypeOf(Sankey)).apply(this, arguments));
+
+    var _this = possibleConstructorReturn(this, (Sankey.__proto__ || Object.getPrototypeOf(Sankey)).call(this, props));
+
+    _this.state = _this.processData();
+
+    _this.dragNodeIndex = null;
+    _this.dragStartNodeY = null;
+    _this.dragStartMouseY = null;
+
+    _this.startDrag = _this.startDrag.bind(_this);
+    _this.endDrag = _this.endDrag.bind(_this);
+    _this.onMouseMove = _this.onMouseMove.bind(_this);
+    return _this;
   }
 
   createClass(Sankey, [{
-    key: 'render',
-    value: function render() {
+    key: 'processData',
+    value: function processData() {
       var _props = this.props,
           data = _props.data,
-          width = _props.width,
-          height = _props.height;
-
-
-      var units = "Widgets";
-
-      // format variables
-      var formatNumber = format(",.0f"),
-          // zero decimal places
-      format$$1 = function format$$1(d) {
-        return formatNumber(d) + " " + units;
-      };
+          _props$width = _props.width,
+          width = _props$width === undefined ? 700 : _props$width,
+          _props$height = _props.height,
+          height = _props$height === undefined ? 500 : _props$height,
+          _props$nodeWidth = _props.nodeWidth,
+          nodeWidth = _props$nodeWidth === undefined ? 36 : _props$nodeWidth,
+          _props$nodePadding = _props.nodePadding,
+          nodePadding = _props$nodePadding === undefined ? 40 : _props$nodePadding,
+          _props$iterations = _props.iterations,
+          iterations = _props$iterations === undefined ? 40 : _props$iterations;
 
       // Set the sankey diagram properties
-      var sankey$$1 = sankey().nodeWidth(36).nodePadding(40).size([width, height]);
+
+      var sankey$$1 = sankey().nodeWidth(nodeWidth).nodePadding(nodePadding).size([width, height]);
 
       var path$$1 = sankey$$1.link();
 
-      sankey$$1.nodes(data.nodes).links(data.links).layout(32);
+      sankey$$1.nodes(data.nodes).links(data.links).layout(iterations);
+
+      return { path: path$$1, sankey: sankey$$1 };
+    }
+
+    //begin dragging the rectangle
+
+  }, {
+    key: 'startDrag',
+    value: function startDrag(e, nodeIndex) {
+      this.dragNodeIndex = nodeIndex; //mark which node we are dragging
+      this.dragStartNodeY = this.props.data.nodes[nodeIndex].y; //mark where the node started off
+      this.dragStartMouseY = e.screenY; //mark where our mouse started off
+    }
+
+    //end dragging the rectangle (mouse up in svg, mouse leaves svg)
+
+  }, {
+    key: 'endDrag',
+    value: function endDrag(e) {
+      this.dragNodeIndex = null;
+      this.dragStartNodeY = null;
+      this.dragStartMouseY = null;
+    }
+  }, {
+    key: 'onMouseMove',
+    value: function onMouseMove(e) {
+      //if we are in the middle of dragging
+      if (this.dragNodeIndex !== null && this.dragStartNodeY !== null && this.dragStartMouseY !== null) {
+        var desiredPosition = this.dragStartNodeY + e.screenY - this.dragStartMouseY; //the desired new node position is where it was originally placed, plus the difference in starting and current mouse positions
+
+        //restrict the dragging so that the node must remain within the svg
+        this.props.data.nodes[this.dragNodeIndex].y = Math.max(Math.min(desiredPosition, this.props.height - this.props.data.nodes[this.dragNodeIndex].dy), 0); //node must not exceed top of svg (y=0) or bottom of svg (y=height-node.dy)
+
+        this.setState({ sankey: this.state.sankey.relayout() }); //set state to sankey after relayout
+      }
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      var _props2 = this.props,
+          data = _props2.data,
+          _props2$width = _props2.width,
+          width = _props2$width === undefined ? 700 : _props2$width,
+          _props2$height = _props2.height,
+          height = _props2$height === undefined ? 500 : _props2$height,
+          _props2$format = _props2.format,
+          format$$1 = _props2$format === undefined ? function (d) {
+        return d;
+      } : _props2$format,
+          _props2$textPaddingX = _props2.textPaddingX,
+          textPaddingX = _props2$textPaddingX === undefined ? 6 : _props2$textPaddingX,
+          _props2$textDy = _props2.textDy,
+          textDy = _props2$textDy === undefined ? ".35em" : _props2$textDy;
+
+
+      console.log(data);
 
       return React__default.createElement(
         'svg',
-        { width: width, height: height },
+        { width: width, height: height, onMouseMove: this.onMouseMove, onMouseUp: this.endDrag, onMouseLeave: this.endDrag },
         React__default.createElement(
           'g',
           null,
@@ -5847,11 +5916,11 @@ var Sankey = function (_Component) {
           }).map(function (link$$1, i) {
             return React__default.createElement(
               'path',
-              { key: i, className: styles.path, d: path$$1(link$$1), strokeWidth: Math.max(1, link$$1.dy) },
+              { key: i, className: styles.path, d: _this2.state.path(link$$1), strokeWidth: Math.max(1, link$$1.dy) },
               React__default.createElement(
                 'title',
                 null,
-                link$$1.source.name + " → " + link$$1.target.name + "\node" + format$$1(link$$1.value)
+                link$$1.source.name + " → " + link$$1.target.name + "\nlink has " + format$$1(link$$1.value)
               )
             );
           }),
@@ -5863,16 +5932,18 @@ var Sankey = function (_Component) {
               { key: i, transform: "translate(" + node.x + "," + node.y + ")" },
               React__default.createElement(
                 'rect',
-                { className: styles.nodeRect, height: node.dy, width: sankey$$1.nodeWidth(), fill: node.color, stroke: 'gray' },
+                { className: styles.nodeRect, height: node.dy, width: _this2.state.sankey.nodeWidth(), fill: node.color, stroke: 'gray', onMouseDown: function onMouseDown(e) {
+                    return _this2.startDrag(e, i);
+                  } },
                 React__default.createElement(
                   'title',
                   null,
-                  node.name + "\node" + format$$1(node.value)
+                  node.name + "\nnode has " + format$$1(node.value)
                 )
               ),
               React__default.createElement(
                 'text',
-                { className: styles.nodeText, x: right ? 6 + sankey$$1.nodeWidth() : -6, y: node.dy / 2, dy: '.35em', textAnchor: right ? "start" : "end" },
+                { className: styles.nodeText, x: right ? textPaddingX + _this2.state.sankey.nodeWidth() : -textPaddingX, y: node.dy / 2, dy: textDy, textAnchor: right ? "start" : "end" },
                 node.name
               )
             );
@@ -5886,8 +5957,15 @@ var Sankey = function (_Component) {
 
 Sankey.propTypes = {
   data: PropTypes.object.isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number
+
+  width: PropTypes.number,
+  height: PropTypes.number,
+  nodeWidth: PropTypes.number,
+  nodePadding: PropTypes.number,
+  iterations: PropTypes.number,
+  format: PropTypes.func,
+  textPaddingX: PropTypes.number,
+  textDy: PropTypes.string
 };
 
 module.exports = Sankey;
