@@ -5,6 +5,7 @@ import styles from './styles.css'
 
 import * as d3 from "d3"
 import sankeyFunction from "./sankey.js"
+import memoize from "memoize-one";
 
 //based off of this example: https://bl.ocks.org/GerardoFurtado/ff2096ed1aa29bb74fa151a39e9c1387
 export default class Sankey extends Component {
@@ -34,6 +35,12 @@ export default class Sankey extends Component {
     this.endDrag = this.endDrag.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
   }
+
+  //memoization helper that only runs when the input propsData and propsWidth change
+  //based on this tutorial: https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#what-about-memoization
+  rerunProcessData = memoize(
+    (propsData, propsWidth) => this.processData()
+  );
 
   processData() {
     const {
@@ -95,6 +102,9 @@ export default class Sankey extends Component {
       textPaddingX=6,
       textDy=".35em"
     } = this.props
+
+
+    this.rerunProcessData(data, width); //check if we need to re process our viz (ex if the data or width changed)
 
 
     return (

@@ -27,6 +27,16 @@ cd example && npm start
 npm install --save harryli0088/sankey-d3-react
 ```
 
+## Peer Dependencies
+The following packages are peer dependencies that you must install yourself
+
+- d3
+
+- memoize-one
+
+- prop-types
+
+
 ## Usage
 
 ```jsx
@@ -58,13 +68,43 @@ const format = function(d) { return d + " units"; };
 
 
 export default class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      width: 700
+    }
+
+    this.ref = React.createRef();
+
+    this.resize = this.resize.bind(this);
+  }
+
+  componentDidMount() {
+    window.addEventListener("resize", this.resize); //add resize listener
+
+    this.resize();
+  }
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.resize); //remove resize listener
+  }
+
+  //this function sets the new width that the viz can take up
+  resize() {
+    if(this.ref.current) {
+      this.setState({width: this.ref.current.clientWidth});
+    }
+  }
+
+
+
   render () {
     return (
-      <div>
+      <div ref={this.ref}>
         <Sankey
           data={data} //only required prop, should be object with fields nodes and links
 
-          width={700} //default 700
+          width={this.state.width} //default 700
           height={500} //default 500
           nodeWidth={36} //default 36
           nodePadding={40} //default 40, padding top and bottom between the nodes
@@ -77,7 +117,6 @@ export default class App extends Component {
     )
   }
 }
-
 ```
 
 ## License
