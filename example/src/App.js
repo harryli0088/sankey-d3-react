@@ -31,11 +31,11 @@ export default function App() {
       data={data} //only required prop, should be object with fields nodes and links
 
       iterations={40} //default 40, number of iterations to calculate sankey
-      onLinkMouseOverCallback={function(e, link) {}}
-      onLinkClickCallback={function(e, link) {}}
-      onNodeMouseDownCallback={function(e, node) {}}
-      onNodeDragCallback={function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {}}
-      onNodeMouseUpCallback={function(e) {}}
+      onLinkMouseOverHandler={function(e, link) {}}
+      onLinkClickHandler={function(e, link) {}}
+      onNodeMouseDownHandler={function(e, node) {}}
+      onNodeDragHandler={function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {}}
+      onNodeMouseUpHandler={function(e) {}}
       formatValue={format} //default function (d) {return d}
       height={500}
       textPaddingX={6} //padding horizontally between node and text

@@ -73,11 +73,11 @@ export default function App() {
       data={data} //only required prop, should be object with fields nodes and links
 
       iterations={40} //default 40, number of iterations to calculate sankey
-      onLinkMouseOverCallback={function(e, link) {}}
-      onLinkClickCallback={function(e, link) {}}
-      onNodeMouseDownCallback={function(e, node) {}}
-      onNodeDragCallback={function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {}}
-      onNodeMouseUpCallback={function(e) {}}
+      onLinkMouseOverHandler={function(e, link) {}}
+      onLinkClickHandler={function(e, link) {}}
+      onNodeMouseDownHandler={function(e, node) {}}
+      onNodeDragHandler={function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {}}
+      onNodeMouseUpHandler={function(e) {}}
       formatValue={format} //default (d) => {return d}
       height={500}
       textPaddingX={6} //padding horizontally between node and text
@@ -97,11 +97,11 @@ export default function App() {
 
 Optional props
 - `iterations` {Number} number of iterations to calculate sankey, defaults to `40`
-- `onLinkMouseOverCallback` {Function} defaults to `function(e, link) {}`
-- `onLinkClickCallback` {Function} defaults to `function(e, link) {}`
-- `onNodeMouseDownCallback` {Function} defaults to `function(e, node) {}`
-- `onNodeDragCallback` {Function} defaults to `function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {}`
-- `onNodeMouseUpCallback` {Function} defaults to `function(e) {}`
+- `onLinkMouseOverHandler` {Function} defaults to `function(e, link) {}`
+- `onLinkClickHandler` {Function} defaults to `function(e, link) {}`
+- `onNodeMouseDownHandler` {Function} defaults to `function(e, node) {}`
+- `onNodeDragHandler` {Function} defaults to `function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {}`
+- `onNodeMouseUpHandler` {Function} defaults to `function(e) {}`
 - `formatValue` {Function} defaults to `function (d) {return d}`
 - `height` {Number} defaults to `500`
 - `textPaddingX` {Number} defaults to `6`

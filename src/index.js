@@ -13,11 +13,11 @@ export default class Sankey extends Component {
     data: PropTypes.object.isRequired,
 
     iterations: PropTypes.number,
-    onLinkMouseOverCallback: PropTypes.func,
-    onLinkClickCallback: PropTypes.func,
-    onNodeMouseDownCallback: PropTypes.func,
-    onNodeDragCallback: PropTypes.func,
-    onNodeMouseUpCallback: PropTypes.func,
+    onLinkMouseOverHandler: PropTypes.func,
+    onLinkClickHandler: PropTypes.func,
+    onNodeMouseDownHandler: PropTypes.func,
+    onNodeDragHandler: PropTypes.func,
+    onNodeMouseUpHandler: PropTypes.func,
     formatValue: PropTypes.func,
     height: PropTypes.number,
     textPaddingX: PropTypes.number,
@@ -34,11 +34,11 @@ export default class Sankey extends Component {
 
   static defaultProps = {
     iterations: 40,
-    onLinkMouseOverCallback: function(e, link) {},
-    onLinkClickCallback: function(e, link) {},
-    onNodeMouseDownCallback: function(e, node) {},
-    onNodeDragCallback: function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {},
-    onNodeMouseUpCallback: function(e) {},
+    onLinkMouseOverHandler: function(e, link) {},
+    onLinkClickHandler: function(e, link) {},
+    onNodeMouseDownHandler: function(e, node) {},
+    onNodeDragHandler: function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {},
+    onNodeMouseUpHandler: function(e) {},
     formatValue: function(d) {return d},
     height: 500,
     textPaddingX: 6,
@@ -116,13 +116,13 @@ export default class Sankey extends Component {
     this.dragStartNodeY = this.props.data.nodes[nodeIndex].y; //mark where the node started off
     this.dragStartMouseY = e.screenY; //mark where our mouse started off
 
-    this.props.onNodeMouseDownCallback(e, nodeIndex)
+    this.props.onNodeMouseDownHandler(e, nodeIndex)
   }
 
   //end dragging the rectangle (mouse up in svg, mouse leaves svg)
   endDrag = e => {
     if(this.dragNodeIndex!==null && this.dragStartNodeY!==null && this.dragStartMouseY!==null) {
-      this.props.onNodeMouseUpCallback(e)
+      this.props.onNodeMouseUpHandler(e)
 
     }
 
@@ -141,7 +141,7 @@ export default class Sankey extends Component {
 
       this.setState({sankey: this.state.sankey.relayout()}); //set state to sankey after relayout
 
-      this.props.onNodeDragCallback(e, this.dragNodeIndex, this.dragStartNodeY, this.dragStartMouseY)
+      this.props.onNodeDragHandler(e, this.dragNodeIndex, this.dragStartNodeY, this.dragStartMouseY)
     }
   }
 
@@ -176,8 +176,8 @@ export default class Sankey extends Component {
                   d={this.state.path(link)}
                   strokeWidth={Math.max(1, link.dy)}
                   stroke={linkStroke}
-                  onMouseOver={e => this.props.onLinkMouseOverCallback(e, link)}
-                  onClick={e => this.props.onLinkClickCallback(e, link)}
+                  onMouseOver={e => this.props.onLinkMouseOverHandler(e, link)}
+                  onClick={e => this.props.onLinkClickHandler(e, link)}
                 >
                   <title>{link.source.name + " → " +  link.target.name + "\nlink has " + formatValue(link.value)}</title>
                 </path>
