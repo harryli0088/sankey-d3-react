@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 
 import Sankey from 'sankey-d3-react'
 
@@ -25,53 +25,26 @@ const data = {
 const format = function(d) { return d + " units"; };
 
 
-export default class App extends Component {
-  constructor(props) {
-    super(props);
+export default function App() {
+  return (
+    <Sankey
+      data={data} //only required prop, should be object with fields nodes and links
 
-    this.state = {
-      width: 700
-    }
-
-    this.ref = React.createRef();
-
-    this.resize = this.resize.bind(this);
-  }
-
-  componentDidMount() {
-    window.addEventListener("resize", this.resize); //add resize listener
-
-    this.resize();
-  }
-  componentWillUnmount() {
-    window.removeEventListener("resize", this.resize); //remove resize listener
-  }
-
-  //this function sets the new width that the viz can take up
-  resize() {
-    if(this.ref.current) {
-      this.setState({width: this.ref.current.clientWidth});
-    }
-  }
-
-
-
-  render () {
-    return (
-      <div ref={this.ref}>
-        <Sankey
-          data={data} //only required prop, should be object with fields nodes and links
-
-          width={this.state.width} //default 700
-          height={500} //default 500
-          nodeWidth={36} //default 36
-          nodePadding={40} //default 40, padding top and bottom between the nodes
-          iterations={40} //default 40, number of iterations to calculate sankey
-          format={format} //default (d) => {return d}
-          textPaddingX={6} //default 6, padding horizontally between node and text
-          textDy=".35em" //default ".35em"
-        />
-      </div>
-    )
-  }
+      iterations={40} //default 40, number of iterations to calculate sankey
+      onLinkMouseOverCallback={function(e, link) {}}
+      onLinkClickCallback={function(e, link) {}}
+      onNodeMouseDownCallback={function(e, node) {}}
+      onNodeDragCallback={function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {}}
+      onNodeMouseUpCallback={function(e) {}}
+      formatValue={format} //default function (d) {return d}
+      height={500}
+      textPaddingX={6} //padding horizontally between node and text
+      textDy=".35em"
+      linkStroke="#000"
+      nodeStroke="gray"
+      nodeStrokeWidth={2} //or string
+      nodeWidth={36}
+      nodePadding={40} //padding top and bottom between the nodes
+    />
+  )
 }

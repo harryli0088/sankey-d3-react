@@ -7,55 +7,101 @@ import * as d3 from "d3"
 import sankeyFunction from "./sankey.js"
 import memoize from "memoize-one";
 
-//based off of this example: https://bl.ocks.org/GerardoFurtado/ff2096ed1aa29bb74fa151a39e9c1387
+
 export default class Sankey extends Component {
   static propTypes = {
     data: PropTypes.object.isRequired,
 
-    width: PropTypes.number,
-    height: PropTypes.number,
-    nodeWidth: PropTypes.number,
-    nodePadding: PropTypes.number,
     iterations: PropTypes.number,
-    format: PropTypes.func,
+    onLinkMouseOverCallback: PropTypes.func,
+    onLinkClickCallback: PropTypes.func,
+    onNodeMouseDownCallback: PropTypes.func,
+    onNodeDragCallback: PropTypes.func,
+    onNodeMouseUpCallback: PropTypes.func,
+    formatValue: PropTypes.func,
+    height: PropTypes.number,
     textPaddingX: PropTypes.number,
     textDy: PropTypes.string,
+    linkStroke: PropTypes.string,
+    nodeStroke: PropTypes.string,
+    nodeStrokeWidth: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ]),
+    nodeWidth: PropTypes.number,
+    nodePadding: PropTypes.number,
+  }
+
+  static defaultProps = {
+    iterations: 40,
+    onLinkMouseOverCallback: function(e, link) {},
+    onLinkClickCallback: function(e, link) {},
+    onNodeMouseDownCallback: function(e, node) {},
+    onNodeDragCallback: function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {},
+    onNodeMouseUpCallback: function(e) {},
+    formatValue: function(d) {return d},
+    height: 500,
+    textPaddingX: 6,
+    textDy: ".35em",
+    linkStroke: "#000",
+    nodeStroke: "gray",
+    nodeStrokeWidth: 2,
+    nodeWidth: 36,
+    nodePadding: 40,
   }
 
   constructor(props) {
     super(props)
 
+    this.state = {};
     this.state = this.processData();
+    this.state.width = 500;
 
     this.dragNodeIndex = null;
     this.dragStartNodeY = null;
     this.dragStartMouseY = null;
 
-    this.startDrag = this.startDrag.bind(this);
-    this.endDrag = this.endDrag.bind(this);
-    this.onMouseMove = this.onMouseMove.bind(this);
+    this.ref = React.createRef();
   }
 
-  //memoization helper that only runs when the input propsData and propsWidth change
+  componentDidMount() {
+    window.addEventListener("resize", this.resize); //add resize listener
+
+    this.resize();
+  }
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.resize); //remove resize listener
+  }
+
+  //this function sets the new width that the viz can take up
+  resize = e => {
+    if(this.ref.current) {
+      this.setState({width: this.ref.current.clientWidth});
+    }
+  }
+
+  //memoization helper that only runs when the input propsData and stateWidth change
   //based on this tutorial: https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#what-about-memoization
   rerunProcessData = memoize(
-    (propsData, propsWidth) => this.processData()
+    (propsData, stateWidth) => this.processData()
   );
 
   processData() {
     const {
       data,
 
-      width=700,
-      height=500,
-      nodeWidth=36,
-      nodePadding=40,
-      iterations=40,
+      iterations,
+      height,
+      nodeWidth,
+      nodePadding,
+      nodeStrokeWidth
     } = this.props
+
+    const nodeStrokeWidthPadding = parseInt(nodeStrokeWidth)+1 || 0;
 
 
     // Set the sankey diagram properties
-    const sankey = sankeyFunction().nodeWidth(nodeWidth).nodePadding(nodePadding).size([width, height]);
+    const sankey = sankeyFunction().nodeWidth(nodeWidth).nodePadding(nodePadding).size([this.state.width-nodeStrokeWidthPadding, height-nodeStrokeWidthPadding]);
 
     const path = sankey.link();
 
@@ -65,20 +111,27 @@ export default class Sankey extends Component {
   }
 
   //begin dragging the rectangle
-  startDrag(e, nodeIndex) {
+  startDrag = (e, nodeIndex) => {
     this.dragNodeIndex = nodeIndex; //mark which node we are dragging
     this.dragStartNodeY = this.props.data.nodes[nodeIndex].y; //mark where the node started off
     this.dragStartMouseY = e.screenY; //mark where our mouse started off
+
+    this.props.onNodeMouseDownCallback(e, nodeIndex)
   }
 
   //end dragging the rectangle (mouse up in svg, mouse leaves svg)
-  endDrag(e) {
+  endDrag = e => {
+    if(this.dragNodeIndex!==null && this.dragStartNodeY!==null && this.dragStartMouseY!==null) {
+      this.props.onNodeMouseUpCallback(e)
+
+    }
+
     this.dragNodeIndex = null;
     this.dragStartNodeY = null;
     this.dragStartMouseY = null;
   }
 
-  onMouseMove(e) {
+  onMouseMove = e => {
     //if we are in the middle of dragging
     if(this.dragNodeIndex!==null && this.dragStartNodeY!==null && this.dragStartMouseY!==null) {
       const desiredPosition = this.dragStartNodeY + e.screenY - this.dragStartMouseY; //the desired new node position is where it was originally placed, plus the difference in starting and current mouse positions
@@ -87,6 +140,8 @@ export default class Sankey extends Component {
       this.props.data.nodes[this.dragNodeIndex].y = Math.max( Math.min(desiredPosition, this.props.height-this.props.data.nodes[this.dragNodeIndex].dy), 0); //node must not exceed top of svg (y=0) or bottom of svg (y=height-node.dy)
 
       this.setState({sankey: this.state.sankey.relayout()}); //set state to sankey after relayout
+
+      this.props.onNodeDragCallback(e, this.dragNodeIndex, this.dragStartNodeY, this.dragStartMouseY)
     }
   }
 
@@ -96,43 +151,55 @@ export default class Sankey extends Component {
     const {
       data,
 
-      width=700,
-      height=500,
-      format=(d) => {return d},
-      textPaddingX=6,
-      textDy=".35em"
+      height,
+      formatValue,
+      textPaddingX,
+      textDy,
+      linkStroke,
+      nodeStroke,
+      nodeStrokeWidth,
     } = this.props
 
 
-    this.rerunProcessData(data, width); //check if we need to re process our viz (ex if the data or width changed)
+    this.rerunProcessData(data, this.state.width); //check if we need to re process our viz (ex if the data or width changed)
 
 
     return (
-      <svg width={width} height={height} onMouseMove={this.onMouseMove} onMouseUp={this.endDrag} onMouseLeave={this.endDrag}>
-        <g>
-          {data.links.sort(function(a, b) { return b.dy - a.dy; }).map((link, i) => {
-            return (
-              <path key={i} className={styles.path} d={this.state.path(link)} strokeWidth={Math.max(1, link.dy)}>
-                <title>{link.source.name + " → " +  link.target.name + "\nlink has " + format(link.value)}</title>
-              </path>
-            );
-          })}
+      <div ref={this.ref}>
+        <svg width={this.state.width} height={height} onMouseMove={this.onMouseMove} onMouseUp={this.endDrag} onMouseLeave={this.endDrag}>
+          <g transform={"translate("+(nodeStrokeWidth/2)+","+(nodeStrokeWidth/2)+")"}>
+            {data.links.sort(function(a, b) { return b.dy - a.dy; }).map((link, i) => {
+              return (
+                <path
+                  key={i}
+                  className={styles.path}
+                  d={this.state.path(link)}
+                  strokeWidth={Math.max(1, link.dy)}
+                  stroke={linkStroke}
+                  onMouseOver={e => this.props.onLinkMouseOverCallback(e, link)}
+                  onClick={e => this.props.onLinkClickCallback(e, link)}
+                >
+                  <title>{link.source.name + " → " +  link.target.name + "\nlink has " + formatValue(link.value)}</title>
+                </path>
+              );
+            })}
 
-          {data.nodes.map((node, i) => {
-            const right = node.x < width/2; //true if the text should be to the right of the rect, else should be to left
+            {data.nodes.map((node, i) => {
+              const right = node.x < this.state.width/2; //true if the text should be to the right of the rect, else should be to left
 
-            return(
-              <g key={i} transform={"translate(" + node.x + "," + node.y + ")"}>
-                <rect className={styles.nodeRect} height={node.dy} width={this.state.sankey.nodeWidth()} fill={node.color} stroke="gray" onMouseDown={e => this.startDrag(e, i)}>
-                  <title>{node.name + "\nnode has " + format(node.value)}</title>
-                </rect>
+              return(
+                <g key={i} transform={"translate(" + node.x + "," + node.y + ")"}>
+                  <rect className={styles.nodeRect} height={node.dy} width={this.state.sankey.nodeWidth()} fill={node.color} stroke={nodeStroke} strokeWidth={nodeStrokeWidth} onMouseDown={e => this.startDrag(e, i)}>
+                    <title>{node.name + "\nnode has " + formatValue(node.value)}</title>
+                  </rect>
 
-                <text className={styles.nodeText} x={right ? textPaddingX+this.state.sankey.nodeWidth() : -textPaddingX} y={node.dy/2} dy={textDy} textAnchor={right ? "start" : "end"}>{node.name}</text>
-              </g>
-            );
-          })}
-        </g>
-      </svg>
+                  <text className={styles.nodeText} x={right ? textPaddingX+this.state.sankey.nodeWidth() : -textPaddingX} y={node.dy/2} dy={textDy} textAnchor={right ? "start" : "end"}>{node.name}</text>
+                </g>
+              );
+            })}
+          </g>
+        </svg>
+      </div>
     )
   }
 }

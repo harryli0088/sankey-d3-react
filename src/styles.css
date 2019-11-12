@@ -1,7 +1,7 @@
 /* add css styles here (optional) */
 
 .nodeRect {
-  cursor: ns-resize; 
+  cursor: ns-resize;
   fill-opacity: .9;
   shape-rendering: crispEdges;
 }
@@ -13,7 +13,6 @@
 
 .path {
   fill: none;
-  stroke: #000;
   stroke-opacity: .2;
 }
 
