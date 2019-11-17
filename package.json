@@ -1,6 +1,6 @@
 {
   "name": "sankey-d3-react",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "sankey-d3-react",
   "author": "harryli0088",
   "license": "MIT",
@@ -58,5 +58,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "dependencies": {
+    "memoize-one": "^5.1.1"
+  }
 }

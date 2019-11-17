@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import memoize from "memoize-one";
+import * as d3 from "d3"
 
 import styles from './styles.css'
-
-import * as d3 from "d3"
 import sankeyFunction from "./sankey.js"
 
 
@@ -52,10 +52,9 @@ export default class Sankey extends Component {
   constructor(props) {
     super(props)
 
-    this.state = {width: 500};
-    const results = this.processData();
-    this.state.path = results.path;
-    this.state.sankey = results.sankey;
+    this.state = {
+      width: 500,
+    };
 
     this.dragNodeIndex = null;
     this.dragStartNodeY = null;
@@ -70,13 +69,6 @@ export default class Sankey extends Component {
   }
   componentWillUnmount() {
     window.removeEventListener("resize", this.resize); //remove resize listener
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    //TODO incorrectly removes any mouse move changes
-    if (prevProps.data!==this.props.data || prevState.width!==this.state.width) {
-      this.setState(this.processData());
-    }
   }
 
   //this function sets the new width that the viz can take up
@@ -96,18 +88,28 @@ export default class Sankey extends Component {
       nodePadding,
       nodeStrokeWidth
     } = this.props
-    const nodeStrokeWidthPadding = parseInt(nodeStrokeWidth)+1 || 0;
 
+    const yValues = data.nodes.map(n => n.y); //preserve the y values of the data nodes
 
     // Set the sankey diagram properties
+    const nodeStrokeWidthPadding = parseInt(nodeStrokeWidth)+1 || 0;
     const sankey = sankeyFunction().nodeWidth(nodeWidth).nodePadding(nodePadding).size([this.state.width-nodeStrokeWidthPadding, height-nodeStrokeWidthPadding]);
 
     const path = sankey.link();
 
     sankey.nodes(data.nodes).links(data.links).layout(iterations);
 
+    //if there were nodes AND there were valid y values, preserve the y values even after resizing
+    if(yValues.length>0 && !isNaN(parseInt(yValues[0]))) {
+      data.nodes.forEach((n,i) => n.y=yValues[i])
+    }
+
     return {path: path, sankey: sankey};
   }
+
+  getSankeyData = memoize(
+    (propsData, stateWidth) => this.processData()
+  );
 
   //begin dragging the rectangle
   startDrag = (e, nodeIndex) => {
@@ -138,9 +140,9 @@ export default class Sankey extends Component {
       //restrict the dragging so that the node must remain within the svg
       this.props.data.nodes[this.dragNodeIndex].y = Math.max( Math.min(desiredPosition, this.props.height-this.props.data.nodes[this.dragNodeIndex].dy), 0); //node must not exceed top of svg (y=0) or bottom of svg (y=height-node.dy)
 
-      this.setState({sankey: this.state.sankey.relayout()}); //set state to sankey after relayout
-
       this.props.onNodeDragHandler(e, this.dragNodeIndex, this.dragStartNodeY, this.dragStartMouseY)
+
+      this.forceUpdate()
     }
   }
 
@@ -159,6 +161,12 @@ export default class Sankey extends Component {
       nodeStrokeWidth,
     } = this.props
 
+    const {
+      path,
+      sankey
+    } = this.getSankeyData(data, this.state.width); //this is necessary in case the data from the parent changes OR the screen is resized
+    sankey.relayout(); //this is necessary to drag a node vertically
+
     return (
       <div ref={this.ref}>
         <svg width={this.state.width} height={height} onMouseMove={this.onMouseMove} onMouseUp={this.endDrag} onMouseLeave={this.endDrag}>
@@ -168,7 +176,7 @@ export default class Sankey extends Component {
                 <path
                   key={i}
                   className={styles.path}
-                  d={this.state.path(link)}
+                  d={path(link)}
                   strokeWidth={Math.max(1, link.dy)}
                   stroke={linkStroke}
                   onMouseOver={e => this.props.onLinkMouseOverHandler(e, link)}
@@ -184,11 +192,11 @@ export default class Sankey extends Component {
 
               return(
                 <g key={i} transform={"translate(" + node.x + "," + node.y + ")"}>
-                  <rect className={styles.nodeRect} height={node.dy} width={this.state.sankey.nodeWidth()} fill={node.color} stroke={nodeStroke} strokeWidth={nodeStrokeWidth} onMouseDown={e => this.startDrag(e, i)}>
+                  <rect className={styles.nodeRect} height={node.dy} width={sankey.nodeWidth()} fill={node.color} stroke={nodeStroke} strokeWidth={nodeStrokeWidth} onMouseDown={e => this.startDrag(e, i)}>
                     <title>{node.name + "\nnode has " + formatValue(node.value)}</title>
                   </rect>
 
-                  <text className={styles.nodeText} x={right ? textPaddingX+this.state.sankey.nodeWidth() : -textPaddingX} y={node.dy/2} dy={textDy} textAnchor={right ? "start" : "end"}>{node.name}</text>
+                  <text className={styles.nodeText} x={right ? textPaddingX+sankey.nodeWidth() : -textPaddingX} y={node.dy/2} dy={textDy} textAnchor={right ? "start" : "end"}>{node.name}</text>
                 </g>
               );
             })}
