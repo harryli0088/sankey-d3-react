@@ -93,7 +93,8 @@ export default class Sankey extends Component {
 
     // Set the sankey diagram properties
     const nodeStrokeWidthPadding = parseInt(nodeStrokeWidth)+1 || 0;
-    const sankey = sankeyFunction().nodeWidth(nodeWidth).nodePadding(nodePadding).size([this.state.width-nodeStrokeWidthPadding, height-nodeStrokeWidthPadding]);
+    const width = this.ref.current ? this.ref.current.clientWidth : this.state.width;
+    const sankey = sankeyFunction().nodeWidth(nodeWidth).nodePadding(nodePadding).size([width-nodeStrokeWidthPadding, height-nodeStrokeWidthPadding]);
 
     const path = sankey.link();
 
