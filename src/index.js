@@ -5,7 +5,6 @@ import styles from './styles.css'
 
 import * as d3 from "d3"
 import sankeyFunction from "./sankey.js"
-import memoize from "memoize-one";
 
 
 export default class Sankey extends Component {
@@ -53,9 +52,10 @@ export default class Sankey extends Component {
   constructor(props) {
     super(props)
 
-    this.state = {};
-    this.state = this.processData();
-    this.state.width = 500;
+    this.state = {width: 500};
+    const results = this.processData();
+    this.state.path = results.path;
+    this.state.sankey = results.sankey;
 
     this.dragNodeIndex = null;
     this.dragStartNodeY = null;
@@ -66,11 +66,17 @@ export default class Sankey extends Component {
 
   componentDidMount() {
     window.addEventListener("resize", this.resize); //add resize listener
-
     this.resize();
   }
   componentWillUnmount() {
     window.removeEventListener("resize", this.resize); //remove resize listener
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    //TODO incorrectly removes any mouse move changes
+    if (prevProps.data!==this.props.data || prevState.width!==this.state.width) {
+      this.setState(this.processData());
+    }
   }
 
   //this function sets the new width that the viz can take up
@@ -80,13 +86,7 @@ export default class Sankey extends Component {
     }
   }
 
-  //memoization helper that only runs when the input propsData and stateWidth change
-  //based on this tutorial: https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#what-about-memoization
-  rerunProcessData = memoize(
-    (propsData, stateWidth) => this.processData()
-  );
-
-  processData() {
+  processData = () => {
     const {
       data,
 
@@ -96,7 +96,6 @@ export default class Sankey extends Component {
       nodePadding,
       nodeStrokeWidth
     } = this.props
-
     const nodeStrokeWidthPadding = parseInt(nodeStrokeWidth)+1 || 0;
 
 
@@ -159,10 +158,6 @@ export default class Sankey extends Component {
       nodeStroke,
       nodeStrokeWidth,
     } = this.props
-
-
-    this.rerunProcessData(data, this.state.width); //check if we need to re process our viz (ex if the data or width changed)
-
 
     return (
       <div ref={this.ref}>

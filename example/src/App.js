@@ -2,7 +2,7 @@ import React from 'react'
 
 import Sankey from 'sankey-d3-react'
 
-const data = {
+let data = {
   "nodes":[
     {"node":0,"name":"node0",color:"blue"},
     {"node":1,"name":"node1",color:"green"},
@@ -25,26 +25,50 @@ const data = {
 const format = function(d) { return d + " units"; };
 
 
-export default function App() {
-  return (
-    <Sankey
-      data={data} //only required prop, should be object with fields nodes and links
+export default class App extends React.Component {
+  state = {
+    data: data
+  }
 
-      iterations={40} //default 40, number of iterations to calculate sankey
-      onLinkMouseOverHandler={function(e, link) {}}
-      onLinkClickHandler={function(e, link) {}}
-      onNodeMouseDownHandler={function(e, node) {}}
-      onNodeDragHandler={function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {}}
-      onNodeMouseUpHandler={function(e) {}}
-      formatValue={format} //default function (d) {return d}
-      height={500}
-      textPaddingX={6} //padding horizontally between node and text
-      textDy=".35em"
-      linkStroke="#000"
-      nodeStroke="gray"
-      nodeStrokeWidth={2} //or string
-      nodeWidth={36}
-      nodePadding={40} //padding top and bottom between the nodes
-    />
+  render() {
+    console.log(this.state.data);
+  return (
+    <div>
+      <Sankey
+        data={this.state.data} //only required prop, should be object with fields nodes and links
+
+        iterations={40} //default 40, number of iterations to calculate sankey
+        onLinkMouseOverHandler={function(e, link) {}}
+        onLinkClickHandler={function(e, link) {}}
+        onNodeMouseDownHandler={function(e, node) {}}
+        onNodeDragHandler={function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {}}
+        onNodeMouseUpHandler={function(e) {}}
+        formatValue={format} //default function (d) {return d}
+        height={500}
+        textPaddingX={6} //padding horizontally between node and text
+        textDy=".35em"
+        linkStroke="#000"
+        nodeStroke="gray"
+        nodeStrokeWidth={2} //or string
+        nodeWidth={36}
+        nodePadding={40} //padding top and bottom between the nodes
+      />
+
+      <button onClick={e => {
+        this.setState({data: {nodes:[
+          {"node":0,"name":"node0",color:"blue"},
+          {"node":1,"name":"node1",color:"green"},
+          {"node":2,"name":"node2",color:"red"},
+        ], links:[
+          {"source":0,"target":2,"value":2},
+          {"source":1,"target":2,"value":2},
+        ]}})
+      }}
+      >
+        Test
+      </button>
+    </div>
+
   )
+}
 }
