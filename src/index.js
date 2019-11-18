@@ -105,7 +105,7 @@ export default class Sankey extends Component {
       data.nodes.forEach((n,i) => n.y=yValues[i])
     }
 
-    return {path: path, sankey: sankey};
+    return {path: path, sankey: sankey, width: width};
   }
 
   getSankeyData = memoize(
@@ -164,13 +164,14 @@ export default class Sankey extends Component {
 
     const {
       path,
-      sankey
+      sankey,
+      width
     } = this.getSankeyData(data, this.state.width); //this is necessary in case the data from the parent changes OR the screen is resized
     sankey.relayout(); //this is necessary to drag a node vertically
 
     return (
       <div ref={this.ref}>
-        <svg width={this.state.width} height={height} onMouseMove={this.onMouseMove} onMouseUp={this.endDrag} onMouseLeave={this.endDrag}>
+        <svg width={width} height={height} onMouseMove={this.onMouseMove} onMouseUp={this.endDrag} onMouseLeave={this.endDrag}>
           <g transform={"translate("+(nodeStrokeWidth/2)+","+(nodeStrokeWidth/2)+")"}>
             {data.links.sort(function(a, b) { return b.dy - a.dy; }).map((link, i) => {
               return (
@@ -189,7 +190,7 @@ export default class Sankey extends Component {
             })}
 
             {data.nodes.map((node, i) => {
-              const right = node.x < this.state.width/2; //true if the text should be to the right of the rect, else should be to left
+              const right = node.x < width/2; //true if the text should be to the right of the rect, else should be to left
 
               return(
                 <g key={i} transform={"translate(" + node.x + "," + node.y + ")"}>
