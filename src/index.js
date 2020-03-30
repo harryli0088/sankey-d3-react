@@ -17,11 +17,11 @@ export default class Sankey extends Component {
     onNodeMouseDownHandler: PropTypes.func,
     onNodeDragHandler: PropTypes.func,
     onNodeMouseUpHandler: PropTypes.func,
-    formatValue: PropTypes.func,
     height: PropTypes.number,
     textPaddingX: PropTypes.number,
     textDy: PropTypes.string,
     linkStroke: PropTypes.string,
+    getLinkTitle: PropTypes.func,
     nodeStroke: PropTypes.string,
     nodeStrokeWidth: PropTypes.oneOfType([
       PropTypes.string,
@@ -29,6 +29,7 @@ export default class Sankey extends Component {
     ]),
     nodeWidth: PropTypes.number,
     nodePadding: PropTypes.number,
+    getNodeTitle: PropTypes.func,
   }
 
   static defaultProps = {
@@ -38,15 +39,16 @@ export default class Sankey extends Component {
     onNodeMouseDownHandler: function(e, node) {},
     onNodeDragHandler: function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {},
     onNodeMouseUpHandler: function(e) {},
-    formatValue: function(d) {return d},
     height: 500,
     textPaddingX: 6,
     textDy: ".35em",
     linkStroke: "#000",
+    getLinkTitle: link => link.source.label + " → " +  link.target.label + "\nlink has " + link.value + " units",
     nodeStroke: "gray",
     nodeStrokeWidth: 2,
     nodeWidth: 36,
     nodePadding: 40,
+    getNodeTitle: node => node.label + "\nnode has " + node.value + " units"
   }
 
   constructor(props) {
@@ -84,9 +86,9 @@ export default class Sankey extends Component {
 
       iterations,
       height,
+      nodeStrokeWidth,
       nodeWidth,
       nodePadding,
-      nodeStrokeWidth
     } = this.props
 
     const yValues = data.nodes.map(n => n.y); //preserve the y values of the data nodes
@@ -153,13 +155,18 @@ export default class Sankey extends Component {
     const {
       data,
 
+      onLinkMouseOverHandler,
+      onLinkClickHandler,
+      onNodeDragHandler,
       height,
-      formatValue,
       textPaddingX,
       textDy,
       linkStroke,
+      getLinkTitle,
       nodeStroke,
       nodeStrokeWidth,
+      getNodeTitle,
+
     } = this.props
 
     const {
@@ -174,18 +181,34 @@ export default class Sankey extends Component {
         <svg width={width} height={height} onMouseMove={this.onMouseMove} onMouseUp={this.endDrag} onMouseLeave={this.endDrag}>
           <g transform={"translate("+(nodeStrokeWidth/2)+","+(nodeStrokeWidth/2)+")"}>
             {data.links.sort(function(a, b) { return b.dy - a.dy; }).map((link, i) => {
+              const pathDetails = path(link)
+              const x = (pathDetails.x0 + pathDetails.x1)/2
+              const y = (pathDetails.y0 + pathDetails.y1)/2
+              console.log("pathDetails",(pathDetails.y1-pathDetails.y0),(pathDetails.x1-pathDetails.x0))
               return (
-                <path
-                  key={i}
-                  className={styles.path}
-                  d={path(link)}
-                  strokeWidth={Math.max(1, link.dy)}
-                  stroke={linkStroke}
-                  onMouseOver={e => this.props.onLinkMouseOverHandler(e, link)}
-                  onClick={e => this.props.onLinkClickHandler(e, link)}
-                >
-                  <title>{link.source.name + " → " +  link.target.name + "\nlink has " + formatValue(link.value)}</title>
-                </path>
+                <g key={i}>
+                  <path
+                    className={styles.path}
+                    d={pathDetails.d}
+                    strokeWidth={Math.max(1, link.dy)}
+                    stroke={linkStroke}
+                    onMouseOver={e => onLinkMouseOverHandler(e, link)}
+                    onClick={e => onLinkClickHandler(e, link)}
+                  >
+                    <title>{getLinkTitle(link)}</title>
+                  </path>
+
+                  <text
+                    className={styles.nodeText}
+                    x={x}
+                    y={y}
+                    dy={textDy}
+                    textAnchor="middle"
+                    transform={"rotate("+Math.tan((pathDetails.y1-pathDetails.y0)/(pathDetails.x1-pathDetails.x0))*180/2+","+x+","+y+")"}
+                  >
+                    {link.label}
+                  </text>
+                </g>
               );
             })}
 
@@ -195,10 +218,10 @@ export default class Sankey extends Component {
               return(
                 <g key={i} transform={"translate(" + node.x + "," + node.y + ")"}>
                   <rect className={styles.nodeRect} height={node.dy} width={sankey.nodeWidth()} fill={node.color} stroke={nodeStroke} strokeWidth={nodeStrokeWidth} onMouseDown={e => this.startDrag(e, i)}>
-                    <title>{node.name + "\nnode has " + formatValue(node.value)}</title>
+                    <title>{getNodeTitle(node)}</title>
                   </rect>
 
-                  <text className={styles.nodeText} x={right ? textPaddingX+sankey.nodeWidth() : -textPaddingX} y={node.dy/2} dy={textDy} textAnchor={right ? "start" : "end"}>{node.name}</text>
+                  <text className={styles.nodeText} x={right ? textPaddingX+sankey.nodeWidth() : -textPaddingX} y={node.dy/2} dy={textDy} textAnchor={right ? "start" : "end"}>{node.label}</text>
                 </g>
               );
             })}

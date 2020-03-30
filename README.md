@@ -44,52 +44,59 @@ import React from 'react'
 
 import Sankey from 'sankey-d3-react'
 
-const data = {
-  "nodes":[
-    {"node":0,"name":"node0",color:"blue"},
-    {"node":1,"name":"node1",color:"green"},
-    {"node":2,"name":"node2",color:"red"},
-    {"node":3,"name":"node3",color:"orange"},
-    {"node":4,"name":"node4",color:"yellow"}
+let data = {
+  nodes:[
+    {node:0,label:"Node 0",color:"blue"},
+    {node:1,label:"Node 1",color:"green"},
+    {node:2,label:"Node 2",color:"red"},
+    {node:3,label:"Node 3",color:"orange"},
+    {node:4,label:"Node 4",color:"yellow"}
   ],
-  "links":[
-    {"source":0,"target":2,"value":2},
-    {"source":1,"target":2,"value":2},
-    {"source":1,"target":3,"value":2},
-    {"source":0,"target":4,"value":2},
-    {"source":2,"target":3,"value":2},
-    {"source":2,"target":4,"value":2},
-    {"source":3,"target":4,"value":4}
+  links:[
+    {source:0,target:2,value:2},
+    {source:1,target:2,value:2},
+    {source:1,target:3,value:3},
+    {source:0,target:4,value:2},
+    {source:2,target:3,value:2},
+    {source:2,target:4,value:2},
+    {source:3,target:4,value:4}
   ]
 };
+data.links.forEach(l => l.label=l.value + " ⟶")
 
 
-const format = function(d) { return d + " units"; };
+export default class App extends React.Component {
+  state = {
+    data: data
+  }
 
+  render() {
+    return (
+      <div>
+        <Sankey
+          data={this.state.data} //only required prop, should be object with fields nodes and links
 
-export default function App() {
-  return (
-    <Sankey
-      data={data} //only required prop, should be object with fields nodes and links
+          iterations={40} //default 40, number of iterations to calculate sankey
+          onLinkMouseOverHandler={function(e, link) {}}
+          onLinkClickHandler={function(e, link) {}}
+          onNodeMouseDownHandler={function(e, node) {}}
+          onNodeDragHandler={function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {}}
+          onNodeMouseUpHandler={function(e) {}}
+          height={500}
+          textPaddingX={6} //padding horizontally between node and text
+          textDy=".35em"
+          linkStroke="#000"
+          nodeStroke="gray"
+          nodeStrokeWidth={2} //or string
+          nodeWidth={36}
+          nodePadding={40} //padding top and bottom between the nodes
+        />
+      </div>
 
-      iterations={40} //default 40, number of iterations to calculate sankey
-      onLinkMouseOverHandler={function(e, link) {}}
-      onLinkClickHandler={function(e, link) {}}
-      onNodeMouseDownHandler={function(e, node) {}}
-      onNodeDragHandler={function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {}}
-      onNodeMouseUpHandler={function(e) {}}
-      formatValue={format} //default (d) => {return d}
-      height={500}
-      textPaddingX={6} //padding horizontally between node and text
-      textDy=".35em"
-      linkStroke="#000"
-      nodeStroke="gray"
-      nodeStrokeWidth={2} //or string
-      nodeWidth={36}
-      nodePadding={40} //padding top and bottom between the nodes
-    />
-  )
+    )
+  }
 }
+
 ```
 
 ### Props
@@ -102,15 +109,16 @@ Optional props
 - `onNodeMouseDownHandler` {Function} defaults to `function(e, node) {}`
 - `onNodeDragHandler` {Function} defaults to `function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {}`
 - `onNodeMouseUpHandler` {Function} defaults to `function(e) {}`
-- `formatValue` {Function} defaults to `function (d) {return d}`
 - `height` {Number} defaults to `500`
 - `textPaddingX` {Number} defaults to `6`
 - `textDy` {String} defaults to `.35em`
 - `linkStroke` {String} defaults to `#000`
+- `getLinkTitle` {Function} defaults to `link => link.source.label + " → " +  link.target.label + "\nlink has " + link.value + " units"`
 - `nodeStroke` {String} defaults to `gray`
 - `nodeStrokeWidth` {Number | String} defaults to `2`
 - `nodeWidth` {Number} defaults to `36`
 - `nodePadding` {Number} defaults to `40`
+- `getNodeTitle` {Function} defaults to `node => node.label + "\nnode has " + node.value + " units"`
 
 ## Acknowledgements
 Based off of this example: https://bl.ocks.org/GerardoFurtado/ff2096ed1aa29bb74fa151a39e9c1387

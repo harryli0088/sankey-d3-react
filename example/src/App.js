@@ -3,26 +3,24 @@ import React from 'react'
 import Sankey from 'sankey-d3-react'
 
 let data = {
-  "nodes":[
-    {"node":0,"name":"node0",color:"blue"},
-    {"node":1,"name":"node1",color:"green"},
-    {"node":2,"name":"node2",color:"red"},
-    {"node":3,"name":"node3",color:"orange"},
-    {"node":4,"name":"node4",color:"yellow"}
+  nodes:[
+    {node:0,label:"Node 0",color:"blue"},
+    {node:1,label:"Node 1",color:"green"},
+    {node:2,label:"Node 2",color:"red"},
+    {node:3,label:"Node 3",color:"orange"},
+    {node:4,label:"Node 4",color:"yellow"}
   ],
-  "links":[
-    {"source":0,"target":2,"value":2},
-    {"source":1,"target":2,"value":2},
-    {"source":1,"target":3,"value":2},
-    {"source":0,"target":4,"value":2},
-    {"source":2,"target":3,"value":2},
-    {"source":2,"target":4,"value":2},
-    {"source":3,"target":4,"value":4}
+  links:[
+    {source:0,target:2,value:2},
+    {source:1,target:2,value:2},
+    {source:1,target:3,value:3},
+    {source:0,target:4,value:2},
+    {source:2,target:3,value:2},
+    {source:2,target:4,value:2},
+    {source:3,target:4,value:4}
   ]
 };
-
-
-const format = function(d) { return d + " units"; };
+data.links.forEach(l => l.label=l.value + " ⟶")
 
 
 export default class App extends React.Component {
@@ -43,7 +41,6 @@ export default class App extends React.Component {
         onNodeMouseDownHandler={function(e, node) {}}
         onNodeDragHandler={function(e, dragNodeIndex, dragStartNodeY, dragStartMouseY) {}}
         onNodeMouseUpHandler={function(e) {}}
-        formatValue={format} //default function (d) {return d}
         height={500}
         textPaddingX={6} //padding horizontally between node and text
         textDy=".35em"
@@ -56,12 +53,12 @@ export default class App extends React.Component {
 
       <button onClick={e => {
         this.setState({data: {nodes:[
-          {"node":0,"name":"node0",color:"blue"},
-          {"node":1,"name":"node1",color:"green"},
-          {"node":2,"name":"node2",color:"red"},
+          {node:0,label:"Node 0",color:"blue"},
+          {node:1,label:"Node 1",color:"green"},
+          {node:2,label:"Node 2",color:"red"},
         ], links:[
-          {"source":0,"target":2,"value":2},
-          {"source":1,"target":2,"value":2},
+          {source:0,target:1,value:2},
+          {source:1,target:2,value:2},
         ]}})
       }}
       >

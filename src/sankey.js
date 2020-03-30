@@ -63,10 +63,18 @@ export default function sankey() {
           x3 = xi(1 - curvature),
           y0 = d.source.y + d.sy + d.dy / 2,
           y1 = d.target.y + d.ty + d.dy / 2;
-      return "M" + x0 + "," + y0
-           + "C" + x2 + "," + y0
-           + " " + x3 + "," + y1
-           + " " + x1 + "," + y1;
+      return {
+        d: "M" + x0 + "," + y0
+             + "C" + x2 + "," + y0
+             + " " + x3 + "," + y1
+             + " " + x1 + "," + y1,
+        x0,
+        x1,
+        x2,
+        x3,
+        y0,
+        y1
+      };
     }
 
     link.curvature = function(_) {
