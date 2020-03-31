@@ -184,7 +184,7 @@ export default class Sankey extends Component {
               const pathDetails = path(link)
               const x = (pathDetails.x0 + pathDetails.x1)/2
               const y = (pathDetails.y0 + pathDetails.y1)/2
-              console.log("pathDetails",(pathDetails.y1-pathDetails.y0),(pathDetails.x1-pathDetails.x0))
+
               return (
                 <g key={i}>
                   <path
@@ -202,6 +202,7 @@ export default class Sankey extends Component {
                     className={styles.nodeText}
                     x={x}
                     y={y}
+                    dx={link.labelDx}
                     dy={textDy}
                     textAnchor="middle"
                     transform={"rotate("+Math.tan((pathDetails.y1-pathDetails.y0)/(pathDetails.x1-pathDetails.x0))*180/2+","+x+","+y+")"}
